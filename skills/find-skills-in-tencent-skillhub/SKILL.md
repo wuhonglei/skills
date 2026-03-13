@@ -1,6 +1,7 @@
 ---
 name: find-skills-in-tencent-skillhub
 description: "Search, install, upgrade, and manage agent skills using skillhub CLI. Use when you need to discover new skills, install skills by slug, upgrade installed skills, list available skills, or self-upgrade the skillhub CLI."
+metadata: { "openclaw": { "emoji": "🔧", "requires": { "bins": ["skillhub", "jq"] } } }
 ---
 
 # Find Skills
