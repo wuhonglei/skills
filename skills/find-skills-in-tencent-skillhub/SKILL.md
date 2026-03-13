@@ -1,7 +1,7 @@
 ---
 name: find-skills-in-tencent-skillhub
 description: "Search, install, upgrade, and manage agent skills using skillhub CLI. Use when you need to discover new skills, install skills by slug, upgrade installed skills, list available skills, or self-upgrade the skillhub CLI."
-metadata: { "openclaw": { "emoji": "🔧", "requires": { "bins": ["skillhub", "jq"] } } }
+metadata: { "version": "1.0.4", "source": "https://github.com/wuhonglei/skills", "openclaw": { "emoji": "🔧", "requires": { "bins": ["skillhub", "jq"] } } }
 ---
 
 # Find Skills
@@ -11,13 +11,8 @@ Manage agent skills using the skillhub CLI — search the skill store, install n
 ## Pre-Requirements
 
 ### Install skillhub CLI
-**Note:** 
-- If automatic installation fails, remind users to run the following command manually in the terminal:
-- the website is: https://skillhub.tencent.com/#featured
 
-```bash
-./scripts/install.sh --cli-only
-```
+Follow [skillhub.md](https://skillhub-1388575217.cos.ap-guangzhou.myqcloud.com/install/skillhub.md) to install Skillhub CLI.
 
 ## Quick Start
 
