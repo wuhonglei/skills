@@ -39,61 +39,78 @@ if [ -z "$ACTION" ]; then
     exit 1
 fi
 
-# Build skillhub command based on action
+# Validate slug/query: reject values containing shell metacharacters to prevent injection
+validate_arg() {
+    local arg="$1"
+    local name="$2"
+    if [ -n "$arg" ] && [[ "$arg" =~ [\"\`\$\\\|\;\&\<\>\(\)] ]]; then
+        echo "Error: Invalid characters in '$name' (disallowed for security)"
+        exit 1
+    fi
+}
+
+# Build and execute skillhub command using arrays (no eval)
 case "$ACTION" in
     search)
         QUERY=$(echo "$JSON_INPUT" | jq -r '.query // empty')
         LIMIT=$(echo "$JSON_INPUT" | jq -r '.limit // 20')
         TIMEOUT=$(echo "$JSON_INPUT" | jq -r '.timeout // 6')
         JSON_OUTPUT=$(echo "$JSON_INPUT" | jq -r '.json // false')
-        
-        CMD="skillhub search"
-        [ -n "$QUERY" ] && CMD="$CMD $QUERY"
-        CMD="$CMD --search-limit $LIMIT"
-        CMD="$CMD --search-timeout $TIMEOUT"
-        [ "$JSON_OUTPUT" = "true" ] && CMD="$CMD --json"
+        validate_arg "$QUERY" "query"
+        validate_arg "$LIMIT" "limit"
+        validate_arg "$TIMEOUT" "timeout"
+
+        ARGS=(skillhub search)
+        [ -n "$QUERY" ] && ARGS+=("$QUERY")
+        ARGS+=(--search-limit "$LIMIT" --search-timeout "$TIMEOUT")
+        [ "$JSON_OUTPUT" = "true" ] && ARGS+=(--json)
         ;;
-    
+
     install)
         SLUG=$(echo "$JSON_INPUT" | jq -r '.slug // empty')
         FORCE=$(echo "$JSON_INPUT" | jq -r '.force // false')
-        
+
         if [ -z "$SLUG" ]; then
             echo "Error: 'slug' is required for install action"
             exit 1
         fi
-        
-        CMD="skillhub install"
-        [ "$FORCE" = "true" ] && CMD="$CMD --force"
-        CMD="$CMD $SLUG"
+        validate_arg "$SLUG" "slug"
+
+        ARGS=(skillhub install)
+        [ "$FORCE" = "true" ] && ARGS+=(--force)
+        ARGS+=("$SLUG")
         ;;
-    
+
     upgrade)
         SLUG=$(echo "$JSON_INPUT" | jq -r '.slug // empty')
         CHECK_ONLY=$(echo "$JSON_INPUT" | jq -r '.check_only // false')
         TIMEOUT=$(echo "$JSON_INPUT" | jq -r '.timeout // 20')
-        
-        CMD="skillhub upgrade"
-        [ "$CHECK_ONLY" = "true" ] && CMD="$CMD --check-only"
-        CMD="$CMD --timeout $TIMEOUT"
-        [ -n "$SLUG" ] && CMD="$CMD $SLUG"
+        validate_arg "$SLUG" "slug"
+        validate_arg "$TIMEOUT" "timeout"
+
+        ARGS=(skillhub upgrade)
+        [ "$CHECK_ONLY" = "true" ] && ARGS+=(--check-only)
+        ARGS+=(--timeout "$TIMEOUT")
+        [ -n "$SLUG" ] && ARGS+=("$SLUG")
         ;;
-    
+
     list)
-        CMD="skillhub list"
+        ARGS=(skillhub list)
         ;;
-    
+
     self-upgrade)
         CHECK_ONLY=$(echo "$JSON_INPUT" | jq -r '.check_only // false')
         CURRENT_VERSION=$(echo "$JSON_INPUT" | jq -r '.current_version // empty')
         TIMEOUT=$(echo "$JSON_INPUT" | jq -r '.timeout // 20')
-        
-        CMD="skillhub self-upgrade"
-        [ "$CHECK_ONLY" = "true" ] && CMD="$CMD --check-only"
-        [ -n "$CURRENT_VERSION" ] && CMD="$CMD --current-version $CURRENT_VERSION"
-        CMD="$CMD --timeout $TIMEOUT"
+        validate_arg "$CURRENT_VERSION" "current_version"
+        validate_arg "$TIMEOUT" "timeout"
+
+        ARGS=(skillhub self-upgrade)
+        [ "$CHECK_ONLY" = "true" ] && ARGS+=(--check-only)
+        [ -n "$CURRENT_VERSION" ] && ARGS+=(--current-version "$CURRENT_VERSION")
+        ARGS+=(--timeout "$TIMEOUT")
         ;;
-    
+
     *)
         echo "Error: Unknown action '$ACTION'"
         echo "Valid actions: search, install, upgrade, list, self-upgrade"
@@ -101,5 +118,5 @@ case "$ACTION" in
         ;;
 esac
 
-# Execute the command
-eval "$CMD"
+# Execute the command (arguments passed safely, no eval)
+"${ARGS[@]}"

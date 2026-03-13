@@ -16,8 +16,10 @@ Manage agent skills using the skillhub CLI — search the skill store, install n
 - the website is: https://skillhub.tencent.com/#featured
 
 ```bash
-curl -fsSL https://skillhub-1388575217.cos.ap-guangzhou.myqcloud.com/install/install.sh |  bash -s -- --cli-only
+curl -fsSL https://skillhub-1388575217.cos.ap-guangzhou.myqcloud.com/install/install.sh | bash -s -- --cli-only
 ```
+
+**Security note:** The above command fetches and executes a remote script. Consider downloading and inspecting the script first (`curl -fsSL ... > install.sh`), then running `bash install.sh --cli-only` to review before execution.
 
 ## Quick Start
 
